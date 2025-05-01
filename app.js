@@ -4,6 +4,7 @@ if(process.env.NODE_ENV !="production"){
 
 
 
+
 const express = require("express");
 const app = express();
 const mongoose =  require("mongoose");
@@ -77,28 +78,7 @@ app.use((req,res,next) =>{
    next();
 });
 
-//DEMOUSER
-// app.get("/demouser",async(req,res) =>{
-//    let fakeUser = new User({
-//       email: "abcdef123@gmail.com",
-//       username: "abcdef",
-//    });
-//    let registeredUser = await User.register(fakeUser,"helloworld");
-//    res.send(registeredUser);
-// });
 
-
-
-
-
-
-
-
-
-
-// app.all("*",(req,res,next) =>{
-//    next(new ExpressError(404,"page not found"));
-// });
 
 app.use((err,req,res,next) =>{
    let {statusCode = 500 , message = "Something went wrong!"} = err;
