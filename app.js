@@ -56,8 +56,8 @@ const sessionOptions = {
 };
 
 
-app.get("/",(req,res) =>{
-   res.send("working ....");
+app.get("/", async (req, res) => {
+   res.redirect("/listings");
 });
 
 app.use(session(sessionOptions));
