@@ -37,7 +37,7 @@ async function main() {
    await mongoose.connect(MONGO_URL);
 }
 
-app.set("view engine ","ejs");
+app.set("view engine","ejs");
 app.set("views",path.join(__dirname,"views"));
 app.use(express.urlencoded({extended: true}));
 app.use(methodOverride("_method"));
@@ -56,8 +56,8 @@ const sessionOptions = {
 };
 
 
-app.get("/",(req,res) =>{
-   res.send("working ..........");
+app.get("/", async (req, res) => {
+   res.send("working ....");
 });
 
 app.use(session(sessionOptions));
