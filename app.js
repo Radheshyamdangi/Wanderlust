@@ -70,13 +70,14 @@ const sessionOptions = {
    secret: process.env.SESSION_SECRET || "wanderlust-dev-session-secret",
    resave: false,
    saveUninitialized: false,
-    proxy: process.env.NODE_ENV === "production",
+   proxy: process.env.NODE_ENV === "production",
+   name: "wanderlust.sid",
    cookie: {
       expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       maxAge: 7 * 24 * 60 * 60 * 1000,
       httpOnly: true,
       sameSite: "lax",
-      secure: process.env.NODE_ENV === "production" ? "auto" : false,
+      secure: process.env.NODE_ENV === "production",
    },
 };
 
