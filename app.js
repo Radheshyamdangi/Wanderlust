@@ -55,6 +55,11 @@ app.set("views", path.join(__dirname, "views"));
 app.disable("x-powered-by");
 app.engine("ejs", ejsMate);
 
+if (process.env.NODE_ENV === "production") {
+   // Render sits behind a proxy, so Express must trust it for secure cookies.
+   app.set("trust proxy", 1);
+}
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(methodOverride("_method"));
@@ -65,12 +70,13 @@ const sessionOptions = {
    secret: process.env.SESSION_SECRET || "wanderlust-dev-session-secret",
    resave: false,
    saveUninitialized: false,
+    proxy: process.env.NODE_ENV === "production",
    cookie: {
       expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       maxAge: 7 * 24 * 60 * 60 * 1000,
       httpOnly: true,
       sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV === "production" ? "auto" : false,
    },
 };
 
