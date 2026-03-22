@@ -1,27 +1,132 @@
-<% layout("/layouts/boilerplate") %> 
-<body>
-   <!-- <form method="GET" action="/listings/new">
-      <button>Create new Listing</button>
-   </form> -->
-   <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1">
-      <% for(let listing of allListing){ %>
-         <a href="/listings/<%= listing._id %> " class="listing_link">
-            <div class="card col listing-card" >
-             <img src="<%= listing.image.url%>" class="card-img-top" alt="listing_image" style="height: 20rem">
-             <div class="card-img-overlay"></div>
-             <div class="card-body">
-                <p class="card-text">
-                   <b><%= listing.title %></b>
-                   <br>
-                    &#8377;<%= listing.price.toLocaleString("en-IN") %>/night
-                  </p>
-               </div>
-            </div>
-         </a>
-      <% } %>
+<% layout("/layouts/boilerplate") %>
+<%
+const getRatingTier = (rating) => {
+   if (rating >= 4.5) return "high";
+   if (rating >= 3) return "medium";
+   return "low";
+};
+const createPageLink = (pageNumber) => {
+   const params = new URLSearchParams();
+   if (filters.q) params.set("q", filters.q);
+   if (filters.category) params.set("category", filters.category);
+   if (filters.minPrice) params.set("minPrice", filters.minPrice);
+   if (filters.maxPrice) params.set("maxPrice", filters.maxPrice);
+   if (filters.minRating) params.set("minRating", filters.minRating);
+   if (filters.sort) params.set("sort", filters.sort);
+   params.set("page", pageNumber);
+   return `/listings?${params.toString()}`;
+};
+%>
+<section class="listing-hero">
+   <div>
+      <span class="eyebrow">Search smarter</span>
+      <h1>Find the right stay faster.</h1>
+      <p>Use category, destination, rating, and price filters together to narrow the listings down to something you would actually book.</p>
    </div>
-   
-  
-</body>
+   <div class="results-chip">
+      <strong><%= pagination.totalListings %></strong>
+      <span>results found</span>
+   </div>
+</section>
 
+<section class="filter-shell">
+   <form class="filter-grid" action="/listings" method="GET" aria-label="Filter listings">
+      <div class="filter-field filter-field-wide">
+         <label for="filter-q">Location or keyword</label>
+         <input id="filter-q" type="search" name="q" placeholder="Search by title, location, country" value="<%= filters.q %>">
+      </div>
+      <div class="filter-field">
+         <label for="filter-category">Category</label>
+         <select id="filter-category" name="category">
+            <option value="">All categories</option>
+            <% categories.forEach((category) => { %>
+               <option value="<%= category %>" <%= filters.category === category ? 'selected' : '' %>><%= category %></option>
+            <% }) %>
+         </select>
+      </div>
+      <div class="filter-field">
+         <label for="filter-min">Min price</label>
+         <input id="filter-min" type="number" min="0" name="minPrice" placeholder="0" value="<%= filters.minPrice %>">
+      </div>
+      <div class="filter-field">
+         <label for="filter-max">Max price</label>
+         <input id="filter-max" type="number" min="0" name="maxPrice" placeholder="20000" value="<%= filters.maxPrice %>">
+      </div>
+      <div class="filter-field">
+         <label for="filter-rating">Min rating</label>
+         <select id="filter-rating" name="minRating">
+            <option value="">Any rating</option>
+            <option value="4.5" <%= filters.minRating === '4.5' ? 'selected' : '' %>>4.5+</option>
+            <option value="4" <%= filters.minRating === '4' ? 'selected' : '' %>>4+</option>
+            <option value="3" <%= filters.minRating === '3' ? 'selected' : '' %>>3+</option>
+         </select>
+      </div>
+      <div class="filter-field">
+         <label for="filter-sort">Sort by</label>
+         <select id="filter-sort" name="sort">
+            <% sortOptions.forEach((option) => { %>
+               <option value="<%= option.value %>" <%= filters.sort === option.value ? 'selected' : '' %>><%= option.label %></option>
+            <% }) %>
+         </select>
+      </div>
+      <div class="filter-actions">
+         <button class="btn btn-primary" type="submit" aria-label="Apply listing filters">Apply filters</button>
+         <% if (hasFilters) { %>
+            <a class="btn btn-outline-secondary" href="/listings">Clear</a>
+         <% } %>
+      </div>
+   </form>
+   <div class="category-chip-row">
+      <% categories.forEach((category) => { %>
+         <a href="/listings?category=<%= category %>" class="category-chip <%= filters.category === category ? 'active' : '' %>" data-category="<%= category %>">
+            <span><%= category %></span>
+            <small><%= categoryCountMap[category] || 0 %></small>
+         </a>
+      <% }) %>
+   </div>
+</section>
 
+<% if (!listings.length) { %>
+   <section class="empty-state">
+      <i class="fa-solid fa-map-location-dot"></i>
+      <h2>No listings match these filters yet.</h2>
+      <p>Try widening the price range or switching to another category.</p>
+      <a class="btn btn-primary" href="/listings">View all listings</a>
+   </section>
+<% } else { %>
+   <section class="listing-grid">
+      <% listings.forEach((listing) => { %>
+         <article class="listing-card reveal-card" data-category="<%= listing.category %>">
+            <a href="<%= listing.seoPath %>" class="listing-card-link">
+               <div class="media-shell loading-shell">
+                  <img src="<%= listing.image?.url %>" alt="<%= listing.title %>" class="listing-image">
+               </div>
+               <div class="listing-card-body">
+                  <div class="listing-card-topline">
+                     <span class="category-pill" data-category="<%= listing.category %>"><%= listing.category %></span>
+                     <span class="rating-pill" data-rating-tier="<%= getRatingTier(listing.ratingAverage || 0) %>"><i class="fa-solid fa-star"></i> <%= listing.ratingAverage || 0 %></span>
+                  </div>
+                  <h3><%= listing.title %></h3>
+                  <p><%= listing.location %>, <%= listing.country %></p>
+                  <div class="listing-card-meta">
+                     <strong>Rs. <%= listing.price.toLocaleString('en-IN') %> / night</strong>
+                     <span><%= listing.reviewCount %> reviews</span>
+                  </div>
+               </div>
+            </a>
+         </article>
+      <% }) %>
+   </section>
+<% } %>
+
+<% if (pagination.totalPages > 1) { %>
+   <nav class="pagination-shell" aria-label="Listings pagination">
+      <% if (pagination.page > 1) { %>
+         <a class="btn btn-outline-secondary" href="<%= createPageLink(pagination.page - 1) %>">Previous</a>
+      <% } %>
+      <span>Page <%= pagination.page %> of <%= pagination.totalPages %></span>
+      <% if (pagination.page < pagination.totalPages) { %>
+         <a class="btn btn-outline-secondary" href="<%= createPageLink(pagination.page + 1) %>">Next</a>
+      <% } %>
+   </nav>
+<% } %>

@@ -1,0 +1,119 @@
+<% layout("/layouts/boilerplate") %>
+<%
+const getRatingTier = (rating) => {
+   if (rating >= 4.5) return "high";
+   if (rating >= 3) return "medium";
+   return "low";
+};
+%>
+<section class="hero hero-home">
+   <div class="hero-copy">
+      <span class="eyebrow">Production-ready travel discovery</span>
+      <h1>Stay discovery that feels curated, fast, and ready to scale.</h1>
+      <p>Search by destination, category, price, and rating, then move from inspiration to booking with cleaner user flows for travelers, hosts, and admins.</p>
+      <form class="hero-search" action="/listings" method="GET" aria-label="Search listings">
+         <div class="hero-field">
+            <label for="hero-q">Destination</label>
+            <input id="hero-q" type="search" name="q" placeholder="Goa, Manali, Bali, Lisbon">
+         </div>
+         <div class="hero-field">
+            <label for="hero-category">Category</label>
+            <select id="hero-category" name="category">
+               <option value="">All stays</option>
+               <% listingCategories.forEach((category) => { %>
+                  <option value="<%= category %>"><%= category %></option>
+               <% }) %>
+            </select>
+         </div>
+         <div class="hero-field hero-field-compact">
+            <label for="hero-max-price">Max price</label>
+            <input id="hero-max-price" type="number" min="0" name="maxPrice" placeholder="12000">
+         </div>
+         <button class="btn btn-primary hero-submit" type="submit" aria-label="Search listings">Search stays</button>
+      </form>
+      <div class="hero-stats">
+         <article>
+            <strong><%= stats.totalListings %>+</strong>
+            <span>Live stays</span>
+         </article>
+         <article>
+            <strong><%= stats.totalHosts %>+</strong>
+            <span>Hosts onboarded</span>
+         </article>
+         <article>
+            <strong><%= stats.curatedCategories %></strong>
+            <span>Curated categories</span>
+         </article>
+      </div>
+   </div>
+   <div class="hero-panel">
+      <div class="hero-card floating-card">
+         <span class="eyebrow">Smart filtering</span>
+         <h2>Search without noise</h2>
+         <p>Advanced filters, category-driven discovery, and rating-aware sorting make browsing feel focused instead of overwhelming.</p>
+      </div>
+      <div class="hero-card offset-card">
+         <span class="eyebrow">Built for roles</span>
+         <h2>Hosts, users, admins</h2>
+         <p>Cleaner permissions and clearer dashboards support booking, publishing, moderation, and operations from one platform.</p>
+      </div>
+   </div>
+</section>
+
+<section class="section-block">
+   <div class="section-head">
+      <div>
+         <span class="eyebrow">Featured stays</span>
+         <h2>Fresh listings worth exploring</h2>
+      </div>
+      <a class="section-link" href="/listings">Browse all listings</a>
+   </div>
+   <div class="listing-grid">
+      <% featuredListings.forEach((listing) => { %>
+         <article class="listing-card reveal-card" data-category="<%= listing.category %>">
+            <a href="<%= listing.seoPath %>" class="listing-card-link">
+               <div class="media-shell loading-shell">
+                  <img src="<%= listing.image?.url %>" alt="<%= listing.title %>" class="listing-image">
+               </div>
+               <div class="listing-card-body">
+                  <div class="listing-card-topline">
+                     <span class="category-pill" data-category="<%= listing.category %>"><%= listing.category %></span>
+                     <span class="rating-pill" data-rating-tier="<%= getRatingTier(listing.ratingAverage || 0) %>"><i class="fa-solid fa-star"></i> <%= listing.ratingAverage || 0 %></span>
+                  </div>
+                  <h3><%= listing.title %></h3>
+                  <p><%= listing.location %>, <%= listing.country %></p>
+                  <div class="listing-card-meta">
+                     <strong>Rs. <%= listing.price.toLocaleString('en-IN') %></strong>
+                     <span><%= listing.reviewCount %> reviews</span>
+                  </div>
+               </div>
+            </a>
+         </article>
+      <% }) %>
+   </div>
+</section>
+
+<section class="insight-grid">
+   <article class="insight-panel accent-panel">
+      <span class="eyebrow">Category momentum</span>
+      <h2>Popular categories right now</h2>
+      <div class="category-stat-grid">
+         <% categoryStats.forEach((item) => { %>
+            <a href="/listings?category=<%= item._id %>" class="category-stat-card" data-category="<%= item._id %>">
+               <strong><%= item._id %></strong>
+               <span><%= item.count %> listings</span>
+            </a>
+         <% }) %>
+      </div>
+   </article>
+   <article class="insight-panel">
+      <span class="eyebrow">Platform upgrades</span>
+      <ul class="feature-list">
+         <li>Role-aware navigation and dashboards</li>
+         <li>Search by location, category, budget, and ratings</li>
+         <li>SEO-friendly listing detail routes</li>
+         <li>Booking model with date-conflict protection</li>
+         <li>Cleaner middleware, validation, and error flow</li>
+      </ul>
+   </article>
+</section>

@@ -1,24 +1,42 @@
 const Listing = require("../models/listing");
 const Review = require("../models/review");
 
+const syncListingRatings = async (listingId) => {
+   const listing = await Listing.findById(listingId).populate("reviews");
 
+   if (!listing) {
+      return;
+   }
 
-module.exports.createReview = async(req,res) =>{
-   let listing = await Listing.findById(req.params.id);
-   let newReview = new Review(req.body.review);
+   const reviewCount = listing.reviews.length;
+   const totalRating = listing.reviews.reduce((sum, review) => sum + review.rating, 0);
+   listing.reviewCount = reviewCount;
+   listing.ratingAverage = reviewCount ? Number((totalRating / reviewCount).toFixed(1)) : 0;
+   await listing.save();
+};
+
+module.exports.createReview = async (req, res) => {
+   const listing = await Listing.findById(req.params.id);
+   if (!listing) {
+      req.flash("error", "Listing not found.");
+      return res.redirect("/listings");
+   }
+   const newReview = new Review(req.body.review);
    newReview.author = req.user._id;
    listing.reviews.push(newReview);
    await newReview.save();
    await listing.save();
-   req.flash("success","New Review Created!");
+   await syncListingRatings(req.params.id);
+   req.flash("success", "New review added successfully.");
    res.redirect(`/listings/${listing._id}`);
 };
 
-module.exports.destroyReview = async(req,res) =>{
-   let {id,reviewId} =req.params;
-   await Listing.findByIdAndUpdate(id,{$pull:{reviews:reviewId}});
+module.exports.destroyReview = async (req, res) => {
+   const { id, reviewId } = req.params;
+   await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
    await Review.findByIdAndDelete(reviewId);
-   req.flash("success","Review Deleted!");
+   await syncListingRatings(id);
+   req.flash("success", "Review deleted successfully.");
 
    res.redirect(`/listings/${id}`);
 };

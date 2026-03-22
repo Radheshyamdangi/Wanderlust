@@ -1,0 +1,62 @@
+<% layout("/layouts/boilerplate") %>
+<section class="section-block">
+   <div class="section-head bookings-head">
+      <div>
+         <span class="eyebrow">Reservation management</span>
+         <h1><%= bookingScope === 'platform' ? 'Platform bookings' : bookingScope === 'host' ? 'Bookings for your listings' : 'Your bookings' %></h1>
+      </div>
+      <% if (bookingScope === 'your') { %>
+         <a class="btn btn-primary" href="/listings">Book another stay</a>
+      <% } %>
+   </div>
+
+   <% if (!bookings.length) { %>
+      <section class="empty-state">
+         <i class="fa-regular fa-calendar"></i>
+         <h2>No bookings to show.</h2>
+         <p>As this flow gets used, booking details will appear here with cleaner status tracking.</p>
+      </section>
+   <% } %>
+
+   <div class="booking-list">
+      <% bookings.forEach((booking) => { %>
+         <article class="detail-panel booking-row">
+            <div>
+               <span class="category-pill"><%= booking.status %></span>
+               <h2><%= booking.listing ? booking.listing.title : 'Listing removed' %></h2>
+               <p><%= booking.listing ? `${booking.listing.location}, ${booking.listing.country}` : 'This listing is no longer available.' %></p>
+            </div>
+            <div class="booking-summary">
+               <div>
+                  <strong>Dates</strong>
+                  <span><%= new Date(booking.checkIn).toLocaleDateString('en-IN') %> to <%= new Date(booking.checkOut).toLocaleDateString('en-IN') %></span>
+               </div>
+               <div>
+                  <strong>Guests</strong>
+                  <span><%= booking.guests %></span>
+               </div>
+               <div>
+                  <strong>Total</strong>
+                  <span>Rs. <%= booking.totalPrice.toLocaleString('en-IN') %></span>
+               </div>
+               <% if (booking.user && bookingScope !== 'your') { %>
+                  <div>
+                     <strong>Traveler</strong>
+                     <span><%= booking.user.fullName || booking.user.username %></span>
+                  </div>
+               <% } %>
+            </div>
+            <div class="booking-actions">
+               <% if (booking.listing) { %>
+                  <a class="btn btn-outline-dark" href="<%= booking.listing.seoPath %>">View listing</a>
+               <% } %>
+               <% if ((bookingScope === 'your' || bookingScope === 'platform') && booking.status !== 'cancelled') { %>
+                  <form method="POST" action="/bookings/<%= booking._id %>?_method=DELETE">
+                     <button class="btn btn-outline-danger" type="submit">Cancel booking</button>
+                  </form>
+               <% } %>
+            </div>
+         </article>
+      <% }) %>
+   </div>
+</section>

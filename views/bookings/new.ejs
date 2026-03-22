@@ -1,0 +1,52 @@
+<% layout("/layouts/boilerplate") %>
+<section class="form-shell booking-form-shell">
+   <div class="form-header">
+      <span class="eyebrow">Traveler booking flow</span>
+      <h1>Book <%= listing.title %></h1>
+      <p>Choose a travel window, confirm guest count, and review the total before you finalize the stay.</p>
+   </div>
+   <div class="booking-checkout-grid">
+      <article class="detail-panel">
+         <div class="media-shell loading-shell compact-media mb-4">
+            <img src="<%= listing.image?.url %>" alt="<%= listing.title %>" class="listing-image">
+         </div>
+         <h2><%= listing.title %></h2>
+         <p><%= listing.location %>, <%= listing.country %></p>
+         <div class="booking-summary stacked-summary">
+            <div>
+               <strong>Hosted by</strong>
+               <span><%= listing.owner ? (listing.owner.fullName || listing.owner.username) : 'WanderLust Host' %></span>
+            </div>
+            <div>
+               <strong>Nightly rate</strong>
+               <span>Rs. <%= listing.price.toLocaleString('en-IN') %></span>
+            </div>
+            <div>
+               <strong>Guest limit</strong>
+               <span><%= listing.maxGuests %> guests</span>
+            </div>
+         </div>
+      </article>
+      <form action="/listings/<%= listing._id %>/bookings" method="POST" class="needs-validation form-card booking-form" novalidate data-nightly-price="<%= listing.price %>">
+         <div class="form-grid">
+            <div class="form-field">
+               <label for="checkIn" class="form-label">Check-in</label>
+               <input id="checkIn" name="booking[checkIn]" type="date" class="form-control" min="<%= new Date().toISOString().split('T')[0] %>" required>
+            </div>
+            <div class="form-field">
+               <label for="checkOut" class="form-label">Check-out</label>
+               <input id="checkOut" name="booking[checkOut]" type="date" class="form-control" min="<%= new Date().toISOString().split('T')[0] %>" required>
+            </div>
+            <div class="form-field full-span">
+               <label for="guests" class="form-label">Guests</label>
+               <input id="guests" name="booking[guests]" type="number" min="1" max="<%= listing.maxGuests %>" class="form-control" value="1" required>
+            </div>
+         </div>
+         <div class="booking-total" data-booking-total>
+            <span>Total estimate</span>
+            <strong>Rs. 0</strong>
+         </div>
+         <button class="btn btn-primary btn-wide mt-3" type="submit">Confirm booking</button>
+      </form>
+   </div>
+</section>

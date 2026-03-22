@@ -1,0 +1,130 @@
+<% layout("/layouts/boilerplate") %>
+<section class="dashboard-shell">
+   <div class="dashboard-hero">
+      <div>
+         <span class="eyebrow">Role-aware workspace</span>
+         <h1>Welcome back, <%= greetingName %>.</h1>
+         <p>This dashboard adapts to your role so travelers, hosts, and admins each land on the most relevant actions first.</p>
+      </div>
+      <span class="role-badge role-<%= dashboardType %>"><%= dashboardType %> view</span>
+   </div>
+
+   <% if (dashboardType === 'admin') { %>
+      <section class="dashboard-stat-grid">
+         <% stats.forEach((stat) => { %>
+            <article class="stat-card">
+               <span><%= stat.label %></span>
+               <strong><%= stat.value %></strong>
+            </article>
+         <% }) %>
+      </section>
+      <section class="dashboard-grid">
+         <article class="detail-panel">
+            <div class="panel-heading">
+               <h2>Recent listings</h2>
+            </div>
+            <% recentListings.forEach((listing) => { %>
+               <a class="dashboard-link-row" href="<%= listing.seoPath %>">
+                  <strong><%= listing.title %></strong>
+                  <span><%= listing.location %>, <%= listing.country %> • <%= listing.category %></span>
+               </a>
+            <% }) %>
+         </article>
+         <article class="detail-panel">
+            <div class="panel-heading">
+               <h2>Recent bookings</h2>
+            </div>
+            <% recentBookings.forEach((booking) => { %>
+               <div class="dashboard-link-row muted-link-row">
+                  <strong><%= booking.listing ? booking.listing.title : 'Listing removed' %></strong>
+                  <span><%= booking.user ? (booking.user.fullName || booking.user.username) : 'Guest' %> • <%= new Date(booking.checkIn).toLocaleDateString('en-IN') %></span>
+               </div>
+            <% }) %>
+         </article>
+      </section>
+   <% } %>
+
+   <% if (dashboardType === 'host') { %>
+      <section class="dashboard-grid host-grid">
+         <article class="detail-panel">
+            <div class="panel-heading">
+               <h2>Your listings</h2>
+               <a href="/listings/new" class="btn btn-sm btn-outline-dark">New listing</a>
+            </div>
+            <% if (!ownedListings.length) { %>
+               <div class="empty-state compact-empty">
+                  <i class="fa-solid fa-house-circle-check"></i>
+                  <h3>No listings yet</h3>
+                  <p>Start with one polished listing and build from there.</p>
+               </div>
+            <% } %>
+            <% ownedListings.forEach((listing) => { %>
+               <a class="dashboard-link-row" href="<%= listing.seoPath %>">
+                  <strong><%= listing.title %></strong>
+                  <span><%= listing.location %>, <%= listing.country %> • Rs. <%= listing.price.toLocaleString('en-IN') %></span>
+               </a>
+            <% }) %>
+         </article>
+         <article class="detail-panel">
+            <div class="panel-heading">
+               <h2>Incoming bookings</h2>
+            </div>
+            <% if (!incomingBookings.length) { %>
+               <div class="empty-state compact-empty">
+                  <i class="fa-regular fa-calendar-check"></i>
+                  <h3>No bookings yet</h3>
+                  <p>Your upcoming reservations will show up here.</p>
+               </div>
+            <% } %>
+            <% incomingBookings.forEach((booking) => { %>
+               <div class="dashboard-link-row muted-link-row">
+                  <strong><%= booking.listing ? booking.listing.title : 'Listing removed' %></strong>
+                  <span><%= booking.user ? (booking.user.fullName || booking.user.username) : 'Guest' %> • <%= new Date(booking.checkIn).toLocaleDateString('en-IN') %></span>
+               </div>
+            <% }) %>
+         </article>
+      </section>
+   <% } %>
+
+   <% if (dashboardType === 'user') { %>
+      <section class="dashboard-grid">
+         <article class="detail-panel">
+            <div class="panel-heading">
+               <h2>Recent bookings</h2>
+               <a href="/bookings" class="btn btn-sm btn-outline-dark">View all</a>
+            </div>
+            <% if (!bookings.length) { %>
+               <div class="empty-state compact-empty">
+                  <i class="fa-solid fa-suitcase-rolling"></i>
+                  <h3>No bookings yet</h3>
+                  <p>Your first confirmed trip will appear here.</p>
+               </div>
+            <% } %>
+            <% bookings.forEach((booking) => { %>
+               <a class="dashboard-link-row" href="<%= booking.listing ? booking.listing.seoPath : '/bookings' %>">
+                  <strong><%= booking.listing ? booking.listing.title : 'Listing removed' %></strong>
+                  <span><%= new Date(booking.checkIn).toLocaleDateString('en-IN') %> to <%= new Date(booking.checkOut).toLocaleDateString('en-IN') %></span>
+               </a>
+            <% }) %>
+         </article>
+         <article class="detail-panel">
+            <div class="panel-heading">
+               <h2>Recent reviews</h2>
+            </div>
+            <% if (!reviews.length) { %>
+               <div class="empty-state compact-empty">
+                  <i class="fa-regular fa-message"></i>
+                  <h3>No reviews yet</h3>
+                  <p>Once you review a stay, the feedback trail starts here.</p>
+               </div>
+            <% } %>
+            <% reviews.forEach((review) => { %>
+               <div class="dashboard-link-row muted-link-row">
+                  <strong><%= review.rating %>/5 rating</strong>
+                  <span><%= review.comment %></span>
+               </div>
+            <% }) %>
+         </article>
+      </section>
+   <% } %>
+</section>

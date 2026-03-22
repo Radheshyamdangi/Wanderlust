@@ -1,27 +1,60 @@
-<nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
-   <div class="container-fluid">
-     <a class="navbar-brand" href="/"><i class="fa-regular fa-compass"></i></a>
-     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" >
-       <span class="navbar-toggler-icon"></span>
-     </button>
-     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-       <div class="navbar-nav">
-         <a class="nav-link "  href="/">Home</a>
-         <a class="nav-link" href="/listings">All Listings</a>
-         <a class="nav-link" href="/listings/new">Add new Listings</a>
-        </div>
-        <div class="navbar-nav ms-auto">
-          <% if(!currUser) {%>
-            <a class="nav-link "  href="/signup">Sing Up</a>
-            <a class="nav-link" href="/login">Log in </a>
-  
-          <%}%>
-          <% if(currUser){%>
-            <a class="nav-link" href="/logout">Log out</a>
-
-          <%}%>
-
+<nav class="navbar navbar-expand-lg site-navbar sticky-top">
+   <div class="container-fluid nav-shell">
+      <a class="navbar-brand brand-lockup" href="/">
+         <span class="brand-mark"><i class="fa-regular fa-compass"></i></span>
+         <span>
+            <strong>WanderLust</strong>
+            <small>Curated stays</small>
+         </span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+         <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+         <form class="nav-search ms-lg-4 my-3 my-lg-0" action="/listings" method="GET" role="search" aria-label="Search listings">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="search" name="q" placeholder="Search destinations, stays, countries" aria-label="Search destinations" value="<%= typeof filters !== 'undefined' && filters.q ? filters.q : '' %>">
+         </form>
+         <div class="navbar-nav nav-links ms-lg-4">
+            <a class="nav-link <%= currentPath === '/' ? 'active' : '' %>" href="/">Home</a>
+            <a class="nav-link <%= currentPath.startsWith('/listings') ? 'active' : '' %>" href="/listings">Explore</a>
+            <% if (currUser && (currUser.role === 'host' || currUser.role === 'admin')) { %>
+               <a class="nav-link" href="/listings/new">Create Listing</a>
+            <% } %>
+            <% if (currUser) { %>
+               <a class="nav-link <%= currentPath.startsWith('/bookings') ? 'active' : '' %>" href="/bookings">Bookings</a>
+               <a class="nav-link <%= currentPath.startsWith('/dashboard') ? 'active' : '' %>" href="/dashboard">Dashboard</a>
+            <% } %>
          </div>
-     </div>
+         <div class="nav-actions ms-lg-auto">
+            <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle dark mode" aria-pressed="false">
+               <i class="fa-regular fa-moon"></i>
+               <span>Theme</span>
+            </button>
+            <% if (!currUser) { %>
+               <a class="btn btn-link nav-auth" href="/login">Log in</a>
+               <a class="btn btn-primary nav-cta" href="/signup">Get Started</a>
+            <% } else { %>
+               <div class="dropdown">
+                  <button class="btn profile-chip dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                     <span class="profile-avatar"><%= (currUser.username || 'W').slice(0, 1).toUpperCase() %></span>
+                     <span>
+                        <strong><%= currUser.fullName || currUser.username %></strong>
+                        <small><%= currUser.role %></small>
+                     </span>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                     <li><a class="dropdown-item" href="/dashboard">Dashboard</a></li>
+                     <li><a class="dropdown-item" href="/bookings">Bookings</a></li>
+                     <% if (currUser.role === 'host' || currUser.role === 'admin') { %>
+                        <li><a class="dropdown-item" href="/listings/new">Create Listing</a></li>
+                     <% } %>
+                     <li><hr class="dropdown-divider"></li>
+                     <li><a class="dropdown-item text-danger" href="/logout">Logout</a></li>
+                  </ul>
+               </div>
+            <% } %>
+         </div>
+      </div>
    </div>
- </nav>
+</nav>

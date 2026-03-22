@@ -1,54 +1,54 @@
 const express = require("express");
 const router = express.Router();
 const wrapAsync = require("../utils/wrapAsync.js");
-const Listing = require("../models/listing.js");
-const {isLoggedIn, isOwner,validateListing} = require("../middleware.js");
-
+const {
+   authorizeRoles,
+   isListingManager,
+   isLoggedIn,
+   validateBooking,
+   validateListing,
+} = require("../middlewares");
 const listingController = require("../controllers/listings.js");
-const multer = require('multer');
-const {storage} = require("../cloudConfig.js");
-const upload = multer({storage});
+const bookingController = require("../controllers/bookings.js");
+const multer = require("multer");
+const { storage } = require("../cloudConfig.js");
+const upload = multer({ storage });
 
-
+router.get("/new", isLoggedIn, authorizeRoles("admin", "host"), listingController.renderNewForm);
 
 router
-.route("/")
-//INDEX ROUTE
-.get(wrapAsync (listingController.index))
-//Create Route
-.post(isLoggedIn , upload.single("listing[image]"),
-   wrapAsync (listingController.createListing)
+   .route("/")
+   .get(wrapAsync(listingController.index))
+   .post(
+      isLoggedIn,
+      authorizeRoles("admin", "host"),
+      upload.single("listing[image]"),
+      validateListing,
+      wrapAsync(listingController.createListing)
+   );
+
+router.get(
+   "/:id/edit",
+   isLoggedIn,
+   authorizeRoles("admin", "host"),
+   wrapAsync(isListingManager),
+   wrapAsync(listingController.renderEditForm)
 );
 
-
-//New Route
-router.get("/new" , isLoggedIn ,listingController.renderNewFrom);
-
-
+router.get("/:id/bookings/new", isLoggedIn, authorizeRoles("user"), wrapAsync(bookingController.renderNewBookingForm));
+router.post("/:id/bookings", isLoggedIn, authorizeRoles("user"), validateBooking, wrapAsync(bookingController.createBooking));
 
 router
-.route("/:id")
-//SHOW ROUTE
-.get( wrapAsync (listingController.showListing))
-
-//Update route
-.put(isLoggedIn ,isOwner ,upload.single("listing[image]"), wrapAsync (listingController.updateListing))
-
-//Delete Route
-.delete(isLoggedIn ,isOwner, wrapAsync (listingController.destroyListing));
-
-
-
-
-
-
-
-
-
-//Edit Route
-router.get("/:id/edit",isLoggedIn,isOwner ,wrapAsync (listingController.renderEditform));
-
-
-
+   .route("/:id/:slug?")
+   .get(wrapAsync(listingController.showListing))
+   .put(
+      isLoggedIn,
+      authorizeRoles("admin", "host"),
+      wrapAsync(isListingManager),
+      upload.single("listing[image]"),
+      validateListing,
+      wrapAsync(listingController.updateListing)
+   )
+   .delete(isLoggedIn, authorizeRoles("admin"), wrapAsync(listingController.destroyListing));
 
 module.exports = router;

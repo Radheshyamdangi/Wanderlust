@@ -1,19 +1,23 @@
-<%- layout("/layouts/boilerplate") %>
-
-<div class="row mt-3">
-   <h1 class="col-6 offset-3">Login on Wanderlust</h1>
-   <div class="col-6 offset-3">
+<% layout("/layouts/boilerplate") %>
+<section class="auth-shell login-shell">
+   <div class="auth-panel auth-copy">
+      <span class="eyebrow">Welcome back</span>
+      <h1>Pick up the trip where you left it.</h1>
+      <p>Login to manage bookings, explore new destinations, or continue building your host portfolio on WanderLust.</p>
+   </div>
+   <div class="auth-panel auth-form-panel">
+      <h2>Log in</h2>
       <form action="/login" method="POST" class="needs-validation" novalidate>
-         <div class="mb-3">
-            <label for="username" class="from-label">Username</label>
+         <div class="form-field">
+            <label for="username" class="form-label">Username</label>
             <input name="username" id="username" type="text" class="form-control" required>
          </div>
-         <div class="mb-3">
-            <label for="password" class="from-label">Password</label>
+         <div class="form-field">
+            <label for="password" class="form-label">Password</label>
             <input name="password" id="password" type="password" class="form-control" required>
          </div>
-         <button class="btn btn-success">Login</button>
+         <button class="btn btn-primary btn-wide mt-3" type="submit">Login</button>
+         <p class="auth-switch">New here? <a href="/signup">Create an account</a>.</p>
       </form>
-
    </div>
-</div>
+</section>
